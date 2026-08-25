@@ -1,0 +1,23 @@
+{
+  "projects": [
+    {
+      "id": "05312eab-e31d-44f5-a217-fcd4fd24d600",
+      "name": "proyecto1",
+      "columns": {
+        "por_hacer": [],
+        "en_progreso": [],
+        "hecho": []
+      }
+    },
+    {
+      "id": "1edd2c31-fd0d-429d-a873-863a1790ff39",
+      "name": "proyectote",
+      "columns": {
+        "por_hacer": [],
+        "en_progreso": [],
+        "hecho": []
+      }
+    }
+  ],
+  "language": "es"
+}
