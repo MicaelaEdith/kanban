@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QVBoxLayout, QLabel, QFrame, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QFrame, QWidget, QScrollArea
 from PySide6.QtCore import Qt
 from widgets.task_card import TaskCard
 from translations import t
@@ -61,17 +61,25 @@ class ColumnWidget(QFrame):
 
         self.cards_container = QWidget()
         self.cards_layout = QVBoxLayout(self.cards_container)
-        self.cards_layout.setContentsMargins(0, 0, 0, 0)
+        self.cards_layout.setContentsMargins(0, 0, 4, 0)
         self.cards_layout.setSpacing(4)
         self.cards_layout.addStretch()
 
         self.setAcceptDrops(True)
 
-        scroll = QFrame()
-        scroll.setStyleSheet("QFrame { border: none; background: transparent; }")
-        scroll_layout = QVBoxLayout(scroll)
-        scroll_layout.setContentsMargins(0, 0, 0, 0)
-        scroll_layout.addWidget(self.cards_container)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self.cards_container)
+        scroll.setStyleSheet(f"""
+            QScrollArea {{
+                border: none;
+                background-color: {self.COLUMN_COLORS[column_id]};
+            }}
+            QScrollArea > QWidget > QWidget {{
+                background-color: {self.COLUMN_COLORS[column_id]};
+            }}
+        """)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         layout.addWidget(scroll, 1)
 

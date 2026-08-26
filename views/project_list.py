@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QLineEdit,
     QPushButton, QFrame, QHBoxLayout, QMessageBox,
-    QMenu, QInputDialog, QComboBox
+    QMenu, QInputDialog, QComboBox, QFileDialog, QScrollArea
 )
 from PySide6.QtCore import Qt, Signal, QMimeData
 from PySide6.QtGui import QDrag, QPixmap
@@ -197,6 +197,24 @@ class ProjectList(QWidget):
 
         top_row.addStretch()
 
+        self.backup_btn = QPushButton(t("backup"))
+        self.backup_btn.setStyleSheet("""
+            QPushButton {
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 13px;
+                color: #555;
+                background: white;
+            }
+            QPushButton:hover {
+                border-color: #1976d2;
+            }
+        """)
+        self.backup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.backup_btn.setMenu(self._create_backup_menu())
+        top_row.addWidget(self.backup_btn)
+
         self.lang_combo = QComboBox()
         for lang in LANGUAGES:
             self.lang_combo.addItem(LANGUAGE_NAMES[lang], lang)
@@ -286,11 +304,22 @@ class ProjectList(QWidget):
 
         layout.addWidget(input_frame)
 
-        self.projects_container = QVBoxLayout()
+        self.projects_container_widget = QWidget()
+        self.projects_container = QVBoxLayout(self.projects_container_widget)
+        self.projects_container.setContentsMargins(0, 0, 0, 0)
         self.projects_container.setSpacing(8)
-        layout.addLayout(self.projects_container)
+        self.projects_container.addStretch()
 
-        layout.addStretch()
+        projects_scroll = QScrollArea()
+        projects_scroll.setWidgetResizable(True)
+        projects_scroll.setWidget(self.projects_container_widget)
+        projects_scroll.setStyleSheet("""
+            QScrollArea { border: none; background-color: #f5f5f5; }
+            QScrollArea > QWidget > QWidget { background-color: #f5f5f5; }
+        """)
+        projects_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        layout.addWidget(projects_scroll, 1)
 
     def _on_language_changed(self, index):
         lang = self.lang_combo.currentData()
@@ -320,6 +349,24 @@ class ProjectList(QWidget):
 
         top_row.addStretch()
 
+        self.backup_btn = QPushButton(t("backup"))
+        self.backup_btn.setStyleSheet("""
+            QPushButton {
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 6px 12px;
+                font-size: 13px;
+                color: #555;
+                background: white;
+            }
+            QPushButton:hover {
+                border-color: #1976d2;
+            }
+        """)
+        self.backup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.backup_btn.setMenu(self._create_backup_menu())
+        top_row.addWidget(self.backup_btn)
+
         self.lang_combo = QComboBox()
         for lang in LANGUAGES:
             self.lang_combo.addItem(LANGUAGE_NAMES[lang], lang)
@@ -409,13 +456,81 @@ class ProjectList(QWidget):
 
         layout.addWidget(input_frame)
 
-        self.projects_container = QVBoxLayout()
+        self.projects_container_widget = QWidget()
+        self.projects_container = QVBoxLayout(self.projects_container_widget)
+        self.projects_container.setContentsMargins(0, 0, 0, 0)
         self.projects_container.setSpacing(8)
-        layout.addLayout(self.projects_container)
+        self.projects_container.addStretch()
 
-        layout.addStretch()
+        projects_scroll = QScrollArea()
+        projects_scroll.setWidgetResizable(True)
+        projects_scroll.setWidget(self.projects_container_widget)
+        projects_scroll.setStyleSheet("""
+            QScrollArea { border: none; background-color: #f5f5f5; }
+            QScrollArea > QWidget > QWidget { background-color: #f5f5f5; }
+        """)
+        projects_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        layout.addWidget(projects_scroll, 1)
 
         self._refresh()
+
+    def _create_backup_menu(self):
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 4px;
+            }
+            QMenu::item {
+                padding: 8px 24px;
+                font-size: 13px;
+                color: #333;
+            }
+            QMenu::item:selected {
+                background-color: #e3f2fd;
+                color: #1976d2;
+            }
+        """)
+        download_action = menu.addAction(t("backup_download"))
+        upload_action = menu.addAction(t("backup_upload"))
+        download_action.triggered.connect(self._download_backup)
+        upload_action.triggered.connect(self._upload_backup)
+        return menu
+
+    def _download_backup(self):
+        filepath, _ = QFileDialog.getSaveFileName(
+            self, t("backup_download"), "kanban_backup.json", "JSON (*.json)"
+        )
+        if not filepath:
+            return
+        try:
+            storage.export_backup(filepath)
+            QMessageBox.information(self, t("backup"), t("backup_success"))
+        except Exception as e:
+            QMessageBox.warning(self, t("backup"), t("backup_load_error"))
+
+    def _upload_backup(self):
+        filepath, _ = QFileDialog.getOpenFileName(
+            self, t("backup_upload"), "", "JSON (*.json)"
+        )
+        if not filepath:
+            return
+        reply = QMessageBox.question(
+            None,
+            t("backup"),
+            t("backup_upload"),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                storage.import_backup(filepath)
+                QMessageBox.information(self, t("backup"), t("backup_load_success"))
+                self._rebuild_ui()
+            except Exception as e:
+                QMessageBox.warning(self, t("backup"), t("backup_load_error"))
 
     def _refresh(self):
         while self.projects_container.count():
@@ -430,6 +545,7 @@ class ProjectList(QWidget):
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet("color: #999; font-size: 14px; padding: 40px;")
             self.projects_container.addWidget(empty)
+            self.projects_container.addStretch()
             return
 
         for project in projects:
@@ -441,6 +557,7 @@ class ProjectList(QWidget):
                 parent_list=self
             )
             self.projects_container.addWidget(card)
+        self.projects_container.addStretch()
 
     def _create_project(self):
         name = self.input_name.text().strip()

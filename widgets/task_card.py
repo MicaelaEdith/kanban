@@ -27,7 +27,7 @@ class TaskCard(QFrame):
         """)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(10, 4, 4, 4)
+        layout.setContentsMargins(10, 4, 10, 4)
 
         self.label = QLabel(text)
         self.label.setStyleSheet("border: none; font-size: 13px; color: #333;")

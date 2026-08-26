@@ -90,3 +90,17 @@ def save_projects_order(projects_list):
     data = _load()
     data["projects"] = projects_list
     _save(data)
+
+
+def export_backup(filepath):
+    data = _load()
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def import_backup(filepath):
+    with open(filepath, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if "projects" not in data:
+        raise ValueError("Invalid backup file")
+    _save(data)
