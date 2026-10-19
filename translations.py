@@ -10,7 +10,7 @@ LANGUAGE_NAMES = {
 
 TRANSLATIONS = {
     "en": {
-        "window_title": "Kanban Board",
+        "window_title": "KanbanEvent",
         "boards": "Boards",
         "create": "Create",
         "delete": "Delete",
@@ -37,7 +37,7 @@ TRANSLATIONS = {
         "backup_load_error": "Error loading backup file",
     },
     "es": {
-        "window_title": "Tablero Kanban",
+        "window_title": "KanbanEvent",
         "boards": "Tableros",
         "create": "Crear",
         "delete": "Eliminar",
@@ -64,7 +64,7 @@ TRANSLATIONS = {
         "backup_load_error": "Error al cargar la copia",
     },
     "it": {
-        "window_title": "Kanban Board",
+        "window_title": "KanbanEvent",
         "boards": "Lavagne",
         "create": "Crea",
         "delete": "Elimina",
@@ -91,7 +91,7 @@ TRANSLATIONS = {
         "backup_load_error": "Errore nel caricamento del backup",
     },
     "pt": {
-        "window_title": "Quadro Kanban",
+        "window_title": "KanbanEvent",
         "boards": "Quadros",
         "create": "Criar",
         "delete": "Eliminar",
@@ -118,7 +118,7 @@ TRANSLATIONS = {
         "backup_load_error": "Erro ao carregar backup",
     },
     "fr": {
-        "window_title": "Tableau Kanban",
+        "window_title": "KanbanEvent",
         "boards": "Tableaux",
         "create": "Cr\u00e9er",
         "delete": "Supprimer",

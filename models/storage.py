@@ -1,9 +1,25 @@
 import json
 import uuid
 import os
+import sys
+import shutil
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+
+def _base_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.dirname(__file__))
+
+
+def _bundled_dir():
+    if getattr(sys, 'frozen', False):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.dirname(__file__))
+
+
+DATA_DIR = os.path.join(_base_dir(), "data")
 DATA_FILE = os.path.join(DATA_DIR, "projects.json")
+BUNDLED_DEFAULT = os.path.join(_bundled_dir(), "data", "projects.json")
 
 DEFAULT_COLUMNS = {
     "por_hacer": [],
@@ -12,9 +28,18 @@ DEFAULT_COLUMNS = {
 }
 
 
-def _load():
+def _ensure_data():
+    os.makedirs(DATA_DIR, exist_ok=True)
     if not os.path.exists(DATA_FILE):
-        return {"language": "en", "projects": []}
+        if os.path.exists(BUNDLED_DEFAULT):
+            shutil.copy2(BUNDLED_DEFAULT, DATA_FILE)
+        else:
+            with open(DATA_FILE, "w", encoding="utf-8") as f:
+                json.dump({"language": "en", "projects": []}, f)
+
+
+def _load():
+    _ensure_data()
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     if "language" not in data:

@@ -1,8 +1,22 @@
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))
+
+if getattr(sys, 'frozen', False):
+    _base_dir = os.path.dirname(sys.executable)
+    _bundled_dir = sys._MEIPASS
+else:
+    _base_dir = os.path.dirname(os.path.abspath(__file__))
+    _bundled_dir = _base_dir
+
+sys.path.insert(0, _base_dir)
+
+
+def resource_path(relative_path):
+    return os.path.join(_bundled_dir, relative_path)
+
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QApplication
+from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 from views.project_list import ProjectList
 from views.board import Board
@@ -16,9 +30,12 @@ class KanbanApp(QMainWindow):
         saved_lang = storage.get_language()
         set_language(saved_lang)
 
-        self.setWindowTitle(t("window_title"))
+        self.setWindowTitle("KanbanEvent")
         self.setMinimumSize(1000, 650)
         self.resize(1200, 750)
+
+        icon = QIcon(resource_path("icono.png"))
+        self.setWindowIcon(icon)
 
         self.setStyleSheet("""
             QMainWindow {
@@ -35,7 +52,7 @@ class KanbanApp(QMainWindow):
         self.stack.addWidget(self.project_list)
 
     def _on_language_changed(self):
-        self.setWindowTitle(t("window_title"))
+        self.setWindowTitle("KanbanEvent")
 
     def _open_board(self, project_id):
         self.board = Board(project_id)
@@ -53,6 +70,9 @@ class KanbanApp(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+
+    icon = QIcon(resource_path("icono.png"))
+    app.setWindowIcon(icon)
 
     font = app.font()
     font.setFamily("Segoe UI")
